@@ -1,5 +1,7 @@
 import http from 'node:http';
 
+const users = [];
+
 const server = http.createServer((request, response) => {
     const method = request.method;
     const url = request.url;
@@ -7,14 +9,24 @@ const server = http.createServer((request, response) => {
     console.log(`mehod: ${method}, url: ${url}`);
 
     if(method === 'GET' && url === '/users') {
-        return response.end('Listagem de usuários');
+        const usersStringified = JSON.stringify(users);
+
+        return response
+        .setHeader('Content-type', 'application/json')
+        .end(usersStringified);
     }
 
     if(method === 'POST' && url === '/users'){
-        return response.end('Criação de usuários');
+        users.push({
+            id: 1,
+            name: 'Pedro',
+            email: 'pedro_marquess@hotmail.com.br'
+        });
+
+        return response.writeHead(201).end();
     }
 
-    return response.end('Hello World');
+    return response.writeHead(404).end('Endpoint Not Found');
 });
 
 server.listen(3333);
