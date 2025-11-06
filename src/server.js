@@ -2,11 +2,20 @@ import http from 'node:http';
 
 const users = [];
 
-const server = http.createServer((request, response) => {
+const server = http.createServer(async (request, response) => {
     const method = request.method;
     const url = request.url;
+    const buffers = [];
 
-    console.log(`mehod: ${method}, url: ${url}`);
+    for await(const chunk of request) {
+        buffers.push(chunk);
+    }
+
+    try {
+        request.body = JSON.parse(Buffer.concat(buffers).toString());
+    } catch {
+        request.body = null;
+    }
 
     if(method === 'GET' && url === '/users') {
         const usersStringified = JSON.stringify(users);
@@ -17,10 +26,15 @@ const server = http.createServer((request, response) => {
     }
 
     if(method === 'POST' && url === '/users'){
+        if(request.body === null) return response.writeHead(400).end('Body não possui valor valido (name, email)');
+
+        const name = request.body.name;
+        const email = request.body.email;
+
         users.push({
             id: 1,
-            name: 'Pedro',
-            email: 'pedro_marquess@hotmail.com.br'
+            name,
+            email
         });
 
         return response.writeHead(201).end();
