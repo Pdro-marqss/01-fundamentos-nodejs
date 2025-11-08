@@ -23,11 +23,11 @@ export const routes = [
             const name = request.body.name;
             const email = request.body.email;
 
-            const user = ({
+            const user = {
                 id: randomUUID(),
                 name,
                 email
-            });
+            };
 
             database.insert('users', user);
 
